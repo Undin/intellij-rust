@@ -92,5 +92,3 @@ class RsMovePathHelper(private val project: Project, private val mod: RsMod) {
         return if (path.resolvesToAndAccessible(element)) path.text else null
     }
 }
-
-private val RsElement.containingModOrSelf: RsMod get() = (this as? RsMod) ?: containingMod
