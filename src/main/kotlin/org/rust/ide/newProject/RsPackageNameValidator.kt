@@ -7,20 +7,26 @@ package org.rust.ide.newProject
 
 /**
  * Validates package name while new project creation.
- *
- * The corresponding cargo [validation](https://github.com/rust-lang/cargo/blob/eea58f205fd2bbafb19c260c7f9978d3e06c6fd4/src/cargo/ops/cargo_new.rs#L121-L170)
  */
 object RsPackageNameValidator {
 
+    /**
+     * Keywords + "test"
+     * https://github.com/rust-lang/cargo/blob/2c6711155232b2d6271bb7147610077c3a8cee65/src/cargo/util/restricted_names.rs#L13
+     * https://github.com/rust-lang/cargo/blob/eb7bc688aef827651fefb0faa70d88717f55d59d/src/cargo/ops/cargo_new.rs#L184
+     */
     private val BLACKLIST = setOf(
-        "abstract", "alignof", "as", "become", "box", "break", "const", "continue", "crate", "do",
-        "else", "enum", "extern", "false", "final", "fn", "for", "if", "impl", "in", "let", "loop",
-        "macro", "match", "mod", "move", "mut", "offsetof", "override", "priv", "proc", "pub",
-        "pure", "ref", "return", "self", "sizeof", "static", "struct", "super", "test", "trait",
-        "true", "type", "typeof", "unsafe", "unsized", "use", "virtual", "where", "while", "yield"
+        "Self", "abstract", "as", "async", "await", "become", "box", "break", "const", "continue",
+        "crate", "do", "dyn", "else", "enum", "extern", "false", "final", "fn", "for", "if",
+        "impl", "in", "let", "loop", "macro", "match", "mod", "move", "mut", "override", "priv",
+        "pub", "ref", "return", "self", "static", "struct", "super", "trait", "true", "try",
+        "type", "typeof", "unsafe", "unsized", "use", "virtual", "where", "while", "yield", "test"
     )
 
-    private val BINARY_BLACKLIST = setOf("deps", "examples", "build", "native", "incremental")
+    /**
+     * https://github.com/rust-lang/cargo/blob/2c6711155232b2d6271bb7147610077c3a8cee65/src/cargo/util/restricted_names.rs#L35
+     */
+    private val BINARY_BLACKLIST = setOf("deps", "examples", "build", "incremental")
 
     fun validate(name: String, isBinary: Boolean): String? = when {
         name.isEmpty() -> "Package name can't be empty"
