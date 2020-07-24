@@ -13,24 +13,19 @@ import com.intellij.openapi.util.Disposer
 import com.intellij.ui.EnumComboBoxModel
 import com.intellij.ui.SimpleListCellRenderer
 import com.intellij.ui.components.JBCheckBox
-import org.rust.cargo.project.model.cargoProjects
 import org.rust.cargo.project.settings.RustProjectSettingsService.MacroExpansionEngine
 import org.rust.cargo.project.settings.ui.RustProjectSettingsPanel
-import org.rust.cargo.toolchain.RustToolchain
+import org.rust.ide.sdk.RsSdkUtils.findOrCreateSdk
 import org.rust.ide.ui.layout
 import org.rust.openapiext.CheckboxDelegate
 import org.rust.openapiext.ComboBoxDelegate
-import org.rust.openapiext.pathAsPath
-import java.nio.file.Paths
 import javax.swing.JComponent
 
 class RsProjectConfigurable(
     project: Project
 ) : RsConfigurableBase(project), Configurable.NoScroll {
 
-    private val rustProjectSettings = RustProjectSettingsPanel(
-        project.cargoProjects.allProjects.firstOrNull()?.rootDir?.pathAsPath ?: Paths.get(".")
-    )
+    private val rustProjectSettings = RustProjectSettingsPanel(project)
 
     private val macroExpansionEngineComboBox: ComboBox<MacroExpansionEngine> =
         ComboBox(EnumComboBoxModel(MacroExpansionEngine::class.java)).apply {
@@ -62,12 +57,7 @@ class RsProjectConfigurable(
     override fun disposeUIResources() = Disposer.dispose(rustProjectSettings)
 
     override fun reset() {
-        val toolchain = settings.toolchain ?: RustToolchain.suggest()
-
-        rustProjectSettings.data = RustProjectSettingsPanel.Data(
-            toolchain = toolchain,
-            explicitPathToStdlib = settings.explicitPathToStdlib
-        )
+        rustProjectSettings.sdk = settings.sdk ?: findOrCreateSdk()
         macroExpansionEngine = settings.macroExpansionEngine
         doctestInjectionEnabled = settings.doctestInjectionEnabled
     }
@@ -77,18 +67,14 @@ class RsProjectConfigurable(
         rustProjectSettings.validateSettings()
 
         settings.modify {
-            it.toolchain = rustProjectSettings.data.toolchain
-            it.explicitPathToStdlib = rustProjectSettings.data.explicitPathToStdlib
+            it.sdk = rustProjectSettings.sdk
             it.macroExpansionEngine = macroExpansionEngine
             it.doctestInjectionEnabled = doctestInjectionEnabled
         }
     }
 
-    override fun isModified(): Boolean {
-        val data = rustProjectSettings.data
-        return data.toolchain?.location != settings.toolchain?.location
-            || data.explicitPathToStdlib != settings.explicitPathToStdlib
+    override fun isModified(): Boolean =
+        rustProjectSettings.sdk != settings.sdk
             || macroExpansionEngine != settings.macroExpansionEngine
             || doctestInjectionEnabled != settings.doctestInjectionEnabled
-    }
 }

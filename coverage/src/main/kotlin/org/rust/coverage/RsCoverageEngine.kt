@@ -187,7 +187,7 @@ class RsCoverageEngine : CoverageEngine() {
         covRunner: CoverageRunner,
         name: String,
         coverageDataFileProvider: CoverageFileProvider,
-        filters: Array<out String>?,
+        filters: Array<out String?>?,
         lastCoverageTimeStamp: Long,
         suiteToMerge: String?,
         coverageByTestEnabled: Boolean,

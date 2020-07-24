@@ -18,10 +18,12 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.messages.Topic
 import org.rust.cargo.CargoConstants
 import org.rust.cargo.project.settings.rustSettings
+import org.rust.cargo.project.settings.toolchain
 import org.rust.cargo.project.workspace.CargoWorkspace
-import org.rust.cargo.toolchain.RustToolchain
 import org.rust.cargo.toolchain.RustcVersion
 import org.rust.ide.notifications.showBalloon
+import org.rust.ide.sdk.RsSdkUtils.findOrCreateSdk
+import org.rust.ide.sdk.toolchain
 import java.nio.file.Path
 import java.util.concurrent.CompletableFuture
 
@@ -92,9 +94,10 @@ interface CargoProject : UserDataHolderEx {
     val stdlibStatus: UpdateStatus
     val rustcInfoStatus: UpdateStatus
 
-    val mergedStatus: UpdateStatus get() = workspaceStatus
-        .merge(stdlibStatus)
-        .merge(rustcInfoStatus)
+    val mergedStatus: UpdateStatus
+        get() = workspaceStatus
+            .merge(stdlibStatus)
+            .merge(rustcInfoStatus)
 
     sealed class UpdateStatus(private val priority: Int) {
         object UpToDate : UpdateStatus(0)
@@ -119,7 +122,7 @@ fun guessAndSetupRustProject(project: Project, explicitRequest: Boolean = false)
         if (alreadyTried) return false
     }
 
-    val toolchain = project.rustSettings.toolchain
+    val toolchain = project.toolchain
     if (toolchain == null || !toolchain.looksLikeValidToolchain()) {
         discoverToolchain(project)
         return true
@@ -132,17 +135,19 @@ fun guessAndSetupRustProject(project: Project, explicitRequest: Boolean = false)
 }
 
 private fun discoverToolchain(project: Project) {
-    val toolchain = RustToolchain.suggest() ?: return
+    val sdk = findOrCreateSdk() ?: return
+    val toolchain = sdk.toolchain ?: return
+
     invokeLater {
         if (project.isDisposed) return@invokeLater
 
-        val oldToolchain = project.rustSettings.toolchain
+        val oldToolchain = project.toolchain
         if (oldToolchain != null && oldToolchain.looksLikeValidToolchain()) {
             return@invokeLater
         }
 
         runWriteAction {
-            project.rustSettings.modify { it.toolchain = toolchain }
+            project.rustSettings.modify { it.sdk = sdk }
         }
 
         val tool = if (toolchain.isRustupAvailable) "rustup" else "Cargo at ${toolchain.presentableLocation}"

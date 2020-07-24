@@ -60,6 +60,7 @@ import org.rust.cargo.toolchain.Rustup
 import org.rust.cargo.util.AutoInjectedCrates
 import org.rust.cargo.util.DownloadResult
 import org.rust.ide.notifications.showBalloon
+import org.rust.ide.sdk.explicitPathToStdlib
 import org.rust.lang.RsFileType
 import org.rust.lang.core.macros.macroExpansionManager
 import org.rust.openapiext.*
@@ -379,9 +380,9 @@ data class CargoProjectImpl(
             }
         }
 
-        val rustup = toolchain?.rustup(workingDirectory)
+        val rustup = toolchain?.rustup()
         if (rustup == null) {
-            val explicitPath = project.rustSettings.explicitPathToStdlib
+            val explicitPath = project.rustSettings.sdk?.explicitPathToStdlib
             val lib = explicitPath?.let { StandardLibrary.fromPath(it) }
             val result = when {
                 explicitPath == null -> TaskResult.Err<StandardLibrary>("no explicit stdlib or rustup found")
@@ -431,8 +432,7 @@ data class CargoProjectImpl(
                 "Can't get rustc info, no Rust toolchain"
             )))
 
-        return fetchRustcInfo(project, toolchain, workingDirectory)
-            .thenApply(this::withRustcInfo)
+        return fetchRustcInfo(project, toolchain).thenApply(this::withRustcInfo)
     }
 
     private fun withRustcInfo(result: TaskResult<RustcInfo>): CargoProjectImpl = when (result) {
@@ -600,11 +600,7 @@ private fun fetchCargoWorkspace(
     }
 }
 
-private fun fetchRustcInfo(
-    project: Project,
-    toolchain: RustToolchain,
-    projectDirectory: Path
-): CompletableFuture<TaskResult<RustcInfo>> {
+private fun fetchRustcInfo(project: Project, toolchain: RustToolchain): CompletableFuture<TaskResult<RustcInfo>> {
     return runAsyncTask(project, project.taskQueue::run, "Getting toolchain version") {
         progress.isIndeterminate = true
         if (!toolchain.looksLikeValidToolchain()) {
@@ -613,7 +609,7 @@ private fun fetchRustcInfo(
             )
         }
 
-        val sysroot = toolchain.getSysroot(projectDirectory)
+        val sysroot = toolchain.getSysroot()
             ?: return@runAsyncTask err("failed to get project sysroot")
         val versions = toolchain.queryVersions()
 

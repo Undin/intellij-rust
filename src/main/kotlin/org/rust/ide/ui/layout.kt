@@ -32,6 +32,7 @@ fun layout(block: RsLayoutBuilder.() -> Unit): JPanel {
 interface RsLayoutBuilder {
     fun row(text: String = "", component: JComponent, toolTip: String = "")
     fun block(text: String, block: RsLayoutBuilder.() -> Unit)
+    fun add(panel: JPanel)
 }
 
 private class RsLayoutBuilderImpl(
@@ -55,5 +56,9 @@ private class RsLayoutBuilderImpl(
         labeledComponent.toolTipText = toolTip.trimIndent()
         labeledComponents += labeledComponent
         panel.add(labeledComponent)
+    }
+
+    override fun add(panel: JPanel) {
+        this.panel.add(panel)
     }
 }

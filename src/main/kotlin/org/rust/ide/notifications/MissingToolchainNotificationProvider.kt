@@ -25,6 +25,8 @@ import org.rust.cargo.project.settings.RustProjectSettingsService.RustSettingsLi
 import org.rust.cargo.project.settings.rustSettings
 import org.rust.cargo.project.settings.toolchain
 import org.rust.cargo.project.workspace.StandardLibrary
+import org.rust.ide.sdk.RsSdkAdditionalData
+import org.rust.ide.sdk.RsSdkUtils.changeSdkModificator
 import org.rust.lang.core.psi.isNotRustFile
 
 /**
@@ -87,7 +89,7 @@ class MissingToolchainNotificationProvider(project: Project) : RsNotificationPro
 
     private fun createBadToolchainPanel(file: VirtualFile): RsEditorNotificationPanel =
         RsEditorNotificationPanel(NO_RUST_TOOLCHAIN).apply {
-            setText("No Rust toolchain configured")
+            text = "No Rust toolchain configured"
             createActionLabel("Setup toolchain") {
                 project.rustSettings.configureToolchain()
             }
@@ -99,12 +101,20 @@ class MissingToolchainNotificationProvider(project: Project) : RsNotificationPro
 
     private fun createLibraryAttachingPanel(file: VirtualFile): RsEditorNotificationPanel =
         RsEditorNotificationPanel(NO_ATTACHED_STDLIB).apply {
-            setText("Can not attach stdlib sources automatically without rustup.")
+            text = "Can not attach stdlib sources automatically without rustup."
             createActionLabel("Attach manually") {
                 val descriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor()
                 val stdlib = FileChooser.chooseFile(descriptor, this, project, null) ?: return@createActionLabel
                 if (StandardLibrary.fromFile(stdlib) != null) {
-                    project.rustSettings.modify { it.explicitPathToStdlib = stdlib.path }
+                    val sdk = project.rustSettings.sdk
+                    if (sdk != null) {
+                        changeSdkModificator(sdk, null) { modificatorToWrite ->
+                            val data = modificatorToWrite.sdkAdditionalData as? RsSdkAdditionalData
+                                ?: return@changeSdkModificator false
+                            data.stdlibPath = stdlib.path
+                            true
+                        }
+                    }
                 } else {
                     project.showBalloon(
                         "Invalid Rust standard library source path: `${stdlib.presentableUrl}`",

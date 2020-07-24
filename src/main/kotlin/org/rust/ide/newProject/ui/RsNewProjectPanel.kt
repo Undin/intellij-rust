@@ -31,7 +31,7 @@ class RsNewProjectPanel(
         templateButtons.forEach { it.addItemListener(checkboxListener) }
     }
 
-    val data: ConfigurationData get() = ConfigurationData(rustProjectSettings.data, templateButtons[0].isSelected)
+    val data: ConfigurationData get() = ConfigurationData(rustProjectSettings.sdk, templateButtons[0].isSelected)
 
     fun attachTo(layout: RsLayoutBuilder) = with(layout) {
         rustProjectSettings.attachTo(this)

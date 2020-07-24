@@ -12,6 +12,7 @@ import com.intellij.testFramework.fixtures.CodeInsightFixtureTestCase
 import com.intellij.util.ui.UIUtil
 import org.rust.*
 import org.rust.cargo.project.model.impl.testCargoProjects
+import org.rust.ide.sdk.toolchain
 
 /**
  * This class allows executing real Cargo during the tests.
@@ -47,7 +48,7 @@ abstract class RsWithToolchainTestBase : CodeInsightFixtureTestCase<ModuleFixtur
         val minRustVersion = findAnnotationInstance<MinRustcVersion>()
         if (minRustVersion != null) {
             val requiredVersion = minRustVersion.semver
-            val rustcVersion = rustupFixture.toolchain!!.queryVersions().rustc
+            val rustcVersion = rustupFixture.sdk!!.toolchain!!.queryVersions().rustc
             if (rustcVersion == null) {
                 System.err.println("SKIP \"$name\": failed to query Rust version")
                 return

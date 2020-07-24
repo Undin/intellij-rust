@@ -33,6 +33,15 @@ class CargoTest : RsTestBase() {
         env: RUST_BACKTRACE=short, TERM=ansi
     """)
 
+    fun `test basic command (nightly)`() = checkCommandLine(
+        cargoNightly.toGeneralCommandLine(project, CargoCommandLine("test", wd, listOf("--all"))), """
+        cmd: /usr/bin/cargo +nightly test --all
+        env: RUST_BACKTRACE=short, TERM=ansi
+        """, """
+        cmd: C:/usr/bin/cargo.exe +nightly test --all
+        env: RUST_BACKTRACE=short, TERM=ansi
+    """)
+
     fun `test propagates proxy settings`() {
         val http = HttpConfigurable().apply {
             USE_HTTP_PROXY = true
@@ -68,15 +77,6 @@ class CargoTest : RsTestBase() {
         env: RUST_BACKTRACE=short, TERM=ansi
         """, """
         cmd: C:/usr/bin/cargo.exe tree
-        env: RUST_BACKTRACE=short, TERM=ansi
-    """)
-
-    fun `test adds nightly channel`() = checkCommandLine(
-        cargo.toColoredCommandLine(project, CargoCommandLine("run", wd, listOf("--release", "--", "foo"), channel = RustChannel.NIGHTLY)), """
-        cmd: /usr/bin/cargo +nightly run --color=always --release -- foo
-        env: RUST_BACKTRACE=short, TERM=ansi
-        """, """
-        cmd: C:/usr/bin/cargo.exe +nightly run --color=always --release -- foo
         env: RUST_BACKTRACE=short, TERM=ansi
     """)
 
@@ -140,8 +140,12 @@ class CargoTest : RsTestBase() {
         return result
     }
 
-    private val toolchain get() = RustToolchain(Paths.get("/usr/bin"))
+    private val toolchain get() = RustToolchain(Paths.get("/usr/bin"), null)
     private val cargo = toolchain.rawCargo()
+
+    private val toolchainNightly get() = RustToolchain(Paths.get("/usr/bin"), "nightly")
+    private val cargoNightly = toolchainNightly.rawCargo()
+
     private val drive = Paths.get("/").toAbsolutePath().toString().toUnixSlashes()
     private val wd = Paths.get("/my-crate")
 

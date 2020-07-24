@@ -19,6 +19,8 @@ import com.intellij.openapi.util.Disposer
 import org.rust.cargo.toolchain.RustToolchain
 import org.rust.ide.newProject.ConfigurationData
 import org.rust.ide.newProject.RsPackageNameValidator
+import org.rust.ide.sdk.RsSdkType
+import org.rust.ide.sdk.toolchain
 
 /**
  * Builder which is used when a new project or module is created and not imported from source.
@@ -27,7 +29,7 @@ class RsModuleBuilder : ModuleBuilder() {
 
     override fun getModuleType(): ModuleType<*>? = RsModuleType.INSTANCE
 
-    override fun isSuitableSdkType(sdkType: SdkTypeId?): Boolean = true
+    override fun isSuitableSdkType(sdkType: SdkTypeId?): Boolean = sdkType is RsSdkType
 
     override fun getCustomOptionsStep(context: WizardContext, parentDisposable: Disposable): ModuleWizardStep =
         CargoConfigurationWizardStep.newProject(context).apply {
@@ -37,7 +39,7 @@ class RsModuleBuilder : ModuleBuilder() {
     override fun setupRootModel(modifiableRootModel: ModifiableRootModel) {
         val root = doAddContentEntry(modifiableRootModel)?.file ?: return
         modifiableRootModel.inheritSdk()
-        val toolchain = configurationData?.settings?.toolchain
+        val toolchain = configurationData?.sdk?.toolchain
         root.refresh(/* async = */ false, /* recursive = */ true)
 
         // Just work if user "creates new project" over an existing one.

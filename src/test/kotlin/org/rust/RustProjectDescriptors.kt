@@ -6,6 +6,7 @@
 package org.rust
 
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.projectRoots.Sdk
 import com.intellij.openapi.roots.ContentEntry
 import com.intellij.openapi.roots.ModifiableRootModel
 import com.intellij.openapi.vfs.LocalFileSystem
@@ -27,6 +28,8 @@ import org.rust.cargo.project.workspace.PackageOrigin
 import org.rust.cargo.project.workspace.StandardLibrary
 import org.rust.cargo.toolchain.RustToolchain
 import org.rust.cargo.util.DownloadResult
+import org.rust.ide.sdk.RsSdkUtils.findOrCreateSdk
+import org.rust.ide.sdk.toolchain
 import java.io.File
 import java.nio.file.Paths
 import java.util.*
@@ -96,10 +99,11 @@ open class RustProjectDescriptorBase : LightProjectDescriptor() {
 }
 
 open class WithRustup(private val delegate: RustProjectDescriptorBase) : RustProjectDescriptorBase() {
-    private val toolchain: RustToolchain? by lazy { RustToolchain.suggest() }
-
-    private val rustup by lazy { toolchain?.rustup(Paths.get(".")) }
+    private val toolchain: RustToolchain? by lazy { sdk?.toolchain }
+    private val rustup by lazy { toolchain?.rustup() }
     val stdlib by lazy { (rustup?.downloadStdlib() as? DownloadResult.Ok)?.value }
+
+    override fun getSdk(): Sdk? = findOrCreateSdk()
 
     override val skipTestReason: String?
         get() {
@@ -111,7 +115,7 @@ open class WithRustup(private val delegate: RustProjectDescriptorBase) : RustPro
     override val rustcInfo: RustcInfo?
         get() {
             val toolchain = toolchain ?: return null
-            val sysroot = toolchain.getSysroot(Paths.get(".")) ?: return null
+            val sysroot = toolchain.getSysroot() ?: return null
             val rustcVersion = toolchain.queryVersions().rustc
             return RustcInfo(sysroot, rustcVersion)
         }

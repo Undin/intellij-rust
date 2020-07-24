@@ -2,5 +2,6 @@
     <extensions defaultExtensionNs="com.intellij">
         <moduleBuilder builderClass="org.rust.ide.idea.RsModuleBuilder"/>
         <projectStructureDetector implementation="org.rust.ide.idea.RsProjectStructureDetector"/>
+        <sdkEditorAdditionalOptionsProvider implementation="org.rust.ide.sdk.RsSdkEditorAdditionalOptionsProvider"/>
     </extensions>
 </idea-plugin>
