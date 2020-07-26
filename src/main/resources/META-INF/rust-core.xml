@@ -983,6 +983,11 @@
                   topic="org.rust.cargo.project.model.CargoProjectsService$CargoProjectsListener" />
     </projectListeners>
 
+    <applicationListeners>
+        <listener class="org.rust.ide.navigation.goto.RsCurrentActionService$Listener"
+                  topic="com.intellij.openapi.actionSystem.ex.AnActionListener" />
+    </applicationListeners>
+
     <actions>
         <action id="Rust.NewRustFile"
                 class="org.rust.ide.actions.RsCreateFileAction"
