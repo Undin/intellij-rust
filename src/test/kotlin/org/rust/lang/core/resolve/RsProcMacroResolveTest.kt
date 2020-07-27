@@ -5,11 +5,13 @@
 
 package org.rust.lang.core.resolve
 
+import org.junit.Ignore
 import org.rust.MockEdition
 import org.rust.ProjectDescriptor
 import org.rust.WithDependencyRustProjectDescriptor
 import org.rust.cargo.project.workspace.CargoWorkspace
 
+@Ignore  // todo
 @MockEdition(CargoWorkspace.Edition.EDITION_2018)
 @ProjectDescriptor(WithDependencyRustProjectDescriptor::class)
 class RsProcMacroResolveTest : RsResolveTestBase() {

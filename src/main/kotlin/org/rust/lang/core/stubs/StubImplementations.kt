@@ -310,6 +310,8 @@ abstract class RsAttributeOwnerStubBase<T: RsElement>(
         get() = BitUtil.isSet(flags, RsAttributeOwnerStub.CFG_MASK)
     override val hasMacroUse: Boolean
         get() = BitUtil.isSet(flags, RsAttributeOwnerStub.HAS_MACRO_USE_MASK)
+    override val hasPreludeImport: Boolean
+        get() = BitUtil.isSet(flags, RsAttributeOwnerStub.HAS_PRELUDE_IMPORT_MASK)
 
     protected abstract val flags: Int
 }

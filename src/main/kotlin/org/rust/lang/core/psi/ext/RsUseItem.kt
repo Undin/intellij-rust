@@ -19,3 +19,6 @@ abstract class RsUseItemImplMixin : RsStubbedElementImpl<RsUseItemStub>, RsUseIt
 
     override fun getContext(): PsiElement? = RsExpandedElement.getContextImpl(this)
 }
+
+val RsUseItem.hasPreludeImport: Boolean
+    get() = greenStub?.hasPreludeImport ?: queryAttributes.hasAttribute("prelude_import")

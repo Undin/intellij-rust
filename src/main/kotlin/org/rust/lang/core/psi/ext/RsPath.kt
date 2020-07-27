@@ -22,18 +22,18 @@ private val RS_PATH_KINDS = tokenSetOf(IDENTIFIER, SELF, SUPER, CSELF, CRATE)
 val RsPath.hasColonColon: Boolean get() = greenStub?.hasColonColon ?: (coloncolon != null)
 val RsPath.hasCself: Boolean get() = kind == PathKind.CSELF
 val RsPath.kind: PathKind get() {
-    val stub = greenStub
-    if (stub != null) return stub.kind
-    val child = node.findChildByType(RS_PATH_KINDS)
-    return when (child?.elementType) {
-        IDENTIFIER -> PathKind.IDENTIFIER
-        SELF -> PathKind.SELF
-        SUPER -> PathKind.SUPER
-        CSELF -> PathKind.CSELF
-        CRATE -> PathKind.CRATE
-        else -> error("Malformed RsPath element: `$text`")
+        val stub = greenStub
+        if (stub != null) return stub.kind
+        val child = node.findChildByType(RS_PATH_KINDS)
+        return when (child?.elementType) {
+            IDENTIFIER -> PathKind.IDENTIFIER
+            SELF -> PathKind.SELF
+            SUPER -> PathKind.SUPER
+            CSELF -> PathKind.CSELF
+            CRATE -> PathKind.CRATE
+            else -> error("Malformed RsPath element: `$text`")
+        }
     }
-}
 
 /** For `Foo::bar::baz::quux` path returns `Foo` */
 tailrec fun RsPath.basePath(): RsPath {
@@ -61,6 +61,19 @@ val RsPath.qualifier: RsPath?
             ctx = ctx.context
         }
         return (ctx as? RsUseSpeck)?.qualifier
+    }
+
+// `use aaa::{bbb, ccc::{ddd1, ddd2}};`
+//                       ~~~~ this
+// returns "aaa::ccc::ddd1"
+val RsPath.fullPath: String
+    get() {
+        val segments = generateSequence(this) { it.qualifier }.toList()
+        val prefix = if (segments.last().hasColonColon) "::" else ""
+        return segments
+            .asReversed()
+            .joinToString("::", prefix = prefix) { it.referenceName }
+            .removeSuffix("::self")  // todo это ок?
     }
 
 fun RsPath.allowedNamespaces(isCompletion: Boolean = false): Set<Namespace> = when (val parent = parent) {

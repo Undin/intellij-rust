@@ -5,10 +5,12 @@
 
 package org.rust.lang.core.resolve
 
+import org.junit.Ignore
 import org.rust.ProjectDescriptor
 import org.rust.WithDependencyRustProjectDescriptor
 import org.rust.WithStdlibAndDependencyRustProjectDescriptor
 
+@Ignore  // todo
 class RsDoctestInjectionResolveTest : RsResolveTestBase() {
     @ProjectDescriptor(WithDependencyRustProjectDescriptor::class)
     fun `test resolve outer element`() = checkByCode("""

@@ -11,6 +11,7 @@ import org.rust.cargo.project.model.CargoProject
 import org.rust.cargo.project.workspace.CargoWorkspace
 import org.rust.cargo.project.workspace.PackageOrigin
 import org.rust.lang.core.psi.RsFile
+import org.rust.lang.core.resolve2.CrateDefMap
 import java.util.*
 
 /**
@@ -85,6 +86,9 @@ interface Crate {
 
         val crate: Crate
     )
+
+    // todo docs
+    val defMap: CrateDefMap?
 }
 
 fun Crate.findDependency(normName: String): Crate? =

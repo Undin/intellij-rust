@@ -14,6 +14,7 @@ import org.rust.lang.core.crate.Crate
 import org.rust.lang.core.crate.CratePersistentId
 import org.rust.lang.core.crate.crateGraph
 import org.rust.lang.core.psi.RsFile
+import org.rust.lang.core.resolve2.CrateDefMap
 import java.util.*
 
 class DoctestCrate(
@@ -42,6 +43,8 @@ class DoctestCrate(
     override val areDoctestsEnabled: Boolean get() = false
     override val presentableName: String get() = parentCrate.presentableName + "-doctest"
     override val normName: String get() = parentCrate.normName + "_doctest"
+
+    override val defMap: CrateDefMap? get() = null
 
     override fun toString(): String = "Doctest in ${parentCrate.cargoTarget?.name}"
 

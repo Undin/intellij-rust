@@ -473,4 +473,18 @@ class RsCfgAttrResolveTest : RsResolveTestBase() {
         foo!();
         //^ lib.rs
      """)
+
+    // `cfg_attr` is not supported yet, but we test that there are no exceptions
+    @MockAdditionalCfgOptions("intellij_rust")
+    fun `test cfg_attr with path on mod declaration`() = stubOnlyResolve("""
+    //- bar.rs
+        pub fn func() {}
+    //- lib.rs
+        #[cfg_attr(intellij_rust, path = "bar.rs")]
+        mod foo;
+        use foo::*;
+        fn main() {
+            func();
+        }  //^ unresolved
+     """)
 }

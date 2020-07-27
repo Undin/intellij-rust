@@ -6,6 +6,7 @@
 package org.rust.lang.core.crate.impl
 
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.util.CachedValueProvider
 import org.rust.cargo.CfgOptions
 import org.rust.cargo.project.model.CargoProject
 import org.rust.cargo.project.workspace.CargoWorkspace
@@ -14,6 +15,10 @@ import org.rust.lang.core.crate.Crate
 import org.rust.lang.core.crate.CratePersistentId
 import org.rust.lang.core.psi.RsFile
 import org.rust.lang.core.psi.rustFile
+import org.rust.lang.core.psi.rustStructureModificationTracker
+import org.rust.lang.core.resolve2.CrateDefMap
+import org.rust.lang.core.resolve2.buildCrateDefMap
+import org.rust.openapiext.CachedValueDelegate
 import org.rust.openapiext.fileId
 import org.rust.openapiext.toPsiFile
 import java.util.*
@@ -57,6 +62,13 @@ class CargoBasedCrate(
     override val areDoctestsEnabled: Boolean get() = cargoTarget.doctest && cargoTarget.isDoctestable
     override val presentableName: String get() = cargoTarget.name
     override val normName: String get() = cargoTarget.normName
+
+    override val defMap: CrateDefMap? by CachedValueDelegate {
+        val project = cargoProject.project
+        val result = buildCrateDefMap(this)
+        // todo use tracker for changes only in this crate
+        CachedValueProvider.Result(result, project.rustStructureModificationTracker)
+    }
 
     override fun toString(): String = "${cargoTarget.name}(${kind.name})"
 }

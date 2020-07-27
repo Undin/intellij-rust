@@ -66,7 +66,7 @@ val RsItemsOwner.expandedItemsCached: RsCachedItems
                 is RsImplItem -> Unit
 
                 // Optimization: prepare use items to reduce PSI tree access in hotter code
-                is RsUseItem ->  {
+                is RsUseItem -> {
                     val isPublic = it.isPublic
                     it.useSpeck?.forEachLeafSpeck { speck ->
                         if (speck.isStarImport) {
@@ -77,6 +77,14 @@ val RsItemsOwner.expandedItemsCached: RsCachedItems
                             val nameInScope = speck.nameInScope ?: return@forEachLeafSpeck
                             val isAtom = speck.alias == null && path.isAtom
                             namedImports += CachedNamedImport(isPublic, path, nameInScope, isAtom)
+                        }
+                    }
+                }
+
+                is RsForeignModItem -> {
+                    for (child in it.itemsAndMacros) {
+                        if (child is RsItemElement) {
+                            rest.add(child)
                         }
                     }
                 }

@@ -13,10 +13,13 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.util.CachedValue
 import org.rust.cargo.util.AutoInjectedCrates.CORE
 import org.rust.cargo.util.AutoInjectedCrates.STD
+import org.rust.ide.experiments.RsExperiments
 import org.rust.lang.core.psi.*
 import org.rust.lang.core.psi.ext.*
 import org.rust.lang.core.resolve.ref.RsReference
 import org.rust.lang.core.resolve.ref.advancedDeepResolve
+import org.rust.lang.core.resolve2.processItemDeclarations2
+import org.rust.openapiext.isFeatureEnabled
 import org.rust.openapiext.recursionGuard
 import org.rust.stdext.intersects
 import java.util.*
@@ -65,6 +68,10 @@ fun processItemDeclarations(
     originalProcessor: RsResolveProcessor,
     ipm: ItemProcessingMode
 ): Boolean {
+    if (scope is RsMod && isFeatureEnabled(RsExperiments.NEW_RESOLVE)) {
+        return processItemDeclarations2(scope, ns, originalProcessor, ipm)
+    }
+
     val withPrivateImports = ipm != ItemProcessingMode.WITHOUT_PRIVATE_IMPORTS
 
     val directlyDeclaredNames = HashMap<String, Set<Namespace>>()
@@ -269,15 +276,15 @@ private fun processMultiResolveWithNs(name: String, ns: Set<Namespace>, ref: RsR
     var variants: List<RsNamedElement> = emptyList()
     val visitedNamespaces = EnumSet.noneOf(Namespace::class.java)
     if (processor.lazy(name) {
-        variants = ref.multiResolve()
-            .filterIsInstance<RsNamedElement>()
-            .filter { ns.intersects(it.namespaces) }
-        val first = variants.firstOrNull()
-        if (first != null) {
-            visitedNamespaces.addAll(first.namespaces)
-        }
-        first
-    }) {
+            variants = ref.multiResolve()
+                .filterIsInstance<RsNamedElement>()
+                .filter { ns.intersects(it.namespaces) }
+            val first = variants.firstOrNull()
+            if (first != null) {
+                visitedNamespaces.addAll(first.namespaces)
+            }
+            first
+        }) {
         return true
     }
     // `variants` will be populated if processor looked at the corresponding element

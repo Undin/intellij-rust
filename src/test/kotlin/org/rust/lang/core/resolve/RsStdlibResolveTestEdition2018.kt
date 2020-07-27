@@ -5,6 +5,7 @@
 
 package org.rust.lang.core.resolve
 
+import org.junit.Ignore
 import org.rust.MockEdition
 import org.rust.ProjectDescriptor
 import org.rust.WithStdlibRustProjectDescriptor
@@ -19,6 +20,7 @@ class RsStdlibResolveTestEdition2018 : RsResolveTestBase() {
                  //^ unresolved
     """)
 
+    @Ignore  // todo testmark
     fun `test extra use of prelude item`() = stubOnlyResolve("""
     //- main.rs
         use Vec;

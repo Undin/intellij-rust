@@ -5,6 +5,7 @@
 
 package org.rust.lang.core.resolve
 
+import org.junit.Ignore
 import org.rust.MockRustcVersion
 import org.rust.lang.core.psi.ext.RsFieldDecl
 
@@ -528,7 +529,7 @@ class RsResolveTest : RsResolveTestBase() {
         }
     """)
 
-    fun `test nested super`() = checkByCode("""
+    fun `test nested super 1`() = checkByCode("""
         mod foo {
             mod bar {
                 fn main() {
@@ -540,6 +541,33 @@ class RsResolveTest : RsResolveTestBase() {
 
         fn foo() {}
          //X
+    """)
+
+    fun `test nested super 2`() = checkByCode("""
+        mod foo {
+            mod bar {
+                use self::super::super::foo;
+                fn main() {
+                    foo();
+                   //^
+                }
+            }
+        }
+
+        fn foo() {}
+         //X
+    """)
+
+    fun `test function and mod with same name`() = checkByCode("""
+        mod foo {}
+
+        fn foo() {}
+         //X
+
+        fn main() {
+            foo();
+           //^
+        }
     """)
 
     fun `test format positional`() = checkByCode("""
@@ -1346,6 +1374,7 @@ class RsResolveTest : RsResolveTestBase() {
                 //^
     """)
 
+    @Ignore  // todo multiresolve
     fun `test extern crate self without alias`() = checkByCode("""
         extern crate self;
 
@@ -1385,6 +1414,19 @@ class RsResolveTest : RsResolveTestBase() {
                     //X
             V([usize; AAA]),
                      //^
+        }
+    """)
+
+    fun `test multiple functions with same name`() = checkByCode("""
+        mod foo {
+            pub fn func() {}
+            pub fn func() {}
+        }
+
+        use foo::func;
+        fn main() {
+            func();
+           //^ unresolved
         }
     """)
 }

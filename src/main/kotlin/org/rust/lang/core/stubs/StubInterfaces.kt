@@ -29,11 +29,15 @@ interface RsAttributeOwnerStub {
     // #[macro_use]
     val hasMacroUse: Boolean
 
+    // #[prelude_import]
+    val hasPreludeImport: Boolean
+
     companion object {
         val ATTRS_MASK: Int = makeBitMask(0)
         val CFG_MASK: Int = makeBitMask(1)
         val HAS_MACRO_USE_MASK: Int = makeBitMask(2)
-        const val USED_BITS: Int = 3
+        val HAS_PRELUDE_IMPORT_MASK: Int = makeBitMask(3)
+        const val USED_BITS: Int = 4
 
         fun extractFlags(element: RsDocAndAttributeOwner): Int =
             extractFlags(element.queryAttributes)
@@ -42,19 +46,21 @@ interface RsAttributeOwnerStub {
             var hasAttrs = false
             var hasCfg = false
             var hasMacroUse = false
+            var hasPreludeImport = false
             for (meta in attrs.metaItems) {
                 hasAttrs = true
                 when (meta.name) {
                     "cfg" -> hasCfg = true
                     "macro_use" -> hasMacroUse = true
+                    "prelude_import" -> hasPreludeImport = true
                     // TODO cfg_attr
                 }
-                if (hasCfg && hasMacroUse) break
             }
             var flags = 0
             flags = BitUtil.set(flags, ATTRS_MASK, hasAttrs)
             flags = BitUtil.set(flags, CFG_MASK, hasCfg)
             flags = BitUtil.set(flags, HAS_MACRO_USE_MASK, hasMacroUse)
+            flags = BitUtil.set(flags, HAS_PRELUDE_IMPORT_MASK, hasPreludeImport)
             return flags
         }
     }

@@ -5,6 +5,7 @@
 
 package org.rust.lang.core.resolve
 
+import org.junit.Ignore
 import org.rust.MockEdition
 import org.rust.cargo.project.workspace.CargoWorkspace.Edition
 import org.rust.stdext.BothEditions
@@ -223,6 +224,7 @@ class RsUseResolveTest : RsResolveTestBase() {
         }
     """)
 
+    @Ignore   // todo ?
     fun `test wildcard`() = checkByCode("""
         mod a {
             fn foo() {}
@@ -489,6 +491,7 @@ class RsUseResolveTest : RsResolveTestBase() {
         }
     """)
 
+    @Ignore  // todo
     fun `test star imports do not leak`() = checkByCode("""
         fn foo() {}
         mod m {
@@ -687,6 +690,74 @@ class RsUseResolveTest : RsResolveTestBase() {
         mod quux {
             use crate::S;
                      //^
+        }
+    """)
+
+    @MockEdition(Edition.EDITION_2018)
+    fun `test complex cyclic chain with glob imports and aliases`() = checkByCode("""
+        mod a {
+            pub use crate::b::*;
+            pub use foo as foo1;
+            pub use foo2 as foo3;
+            pub use foo4::*;
+        }
+        mod b {
+            pub use crate::a::*;
+            pub use foo1 as foo2;
+            pub use foo3 as foo4;
+            pub mod foo {
+                pub struct S;
+            }            //X
+            type T = S;
+        }          //^
+    """)
+
+    @Ignore  // todo
+    @MockEdition(Edition.EDITION_2018)
+    fun `test usual import overrides glob import`() = checkByCode("""
+        mod foo1 {
+            pub mod bar {
+                pub fn func() {}
+            }
+        }
+
+        mod inner {
+            pub mod foo2 {
+                pub mod bar {
+                    pub fn func() {}
+                          //X
+                }
+            }
+        }
+
+        use foo1::*;    // adds `bar`
+        use bar::func;  // uses `foo1::bar` to resolve func
+
+        use inner::*;
+        use foo2::bar;  // unresolved when we resolve `bar::func` (because we haven't processed `use inner::*;` yet)
+
+        fn main() {
+            func();
+           //^
+        }
+    """)
+
+    @MockEdition(Edition.EDITION_2018)
+    fun `test two usual imports with same name in different namespaces`() = checkByCode("""
+        mod a {
+            pub struct foo {}
+            fn foo() {}
+        }
+        mod b {
+            pub fn foo() {}
+                  //X
+        }
+        use a::foo;  // type only
+        use b::foo;  // value
+        fn main() {
+            let a = foo {};
+            foo();
+           //^
         }
     """)
 }

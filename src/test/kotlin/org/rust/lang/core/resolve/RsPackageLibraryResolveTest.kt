@@ -5,6 +5,7 @@
 
 package org.rust.lang.core.resolve
 
+import org.junit.Ignore
 import org.rust.MockEdition
 import org.rust.ProjectDescriptor
 import org.rust.WithDependencyRustProjectDescriptor
@@ -600,6 +601,7 @@ class RsPackageLibraryResolveTest : RsResolveTestBase() {
         }
     """)
 
+    @Ignore  // todo multiresolve
     @MockEdition(CargoWorkspace.Edition.EDITION_2018)
     fun `test ambiguity of extern crate alias and other item with the same name`() {
         stubOnlyResolve("""
@@ -632,6 +634,7 @@ class RsPackageLibraryResolveTest : RsResolveTestBase() {
         """)
     }
 
+    @Ignore  // todo test mark
     // Issue https://github.com/intellij-rust/intellij-rust/issues/3846
     @MockEdition(CargoWorkspace.Edition.EDITION_2018)
     fun `test extra use of crate name 1`() = stubOnlyResolve("""
@@ -643,6 +646,7 @@ class RsPackageLibraryResolveTest : RsResolveTestBase() {
                           //^ dep-lib/lib.rs
     """, ItemResolutionTestmarks.extraAtomUse)
 
+    @Ignore  // todo test mark
     @MockEdition(CargoWorkspace.Edition.EDITION_2018)
     fun `test "extra use of crate name 1" with alias`() = stubOnlyResolve("""
     //- dep-lib/lib.rs
@@ -653,6 +657,7 @@ class RsPackageLibraryResolveTest : RsResolveTestBase() {
                  //^ dep-lib/lib.rs
     """)
 
+    @Ignore  // todo testmark
     @MockEdition(CargoWorkspace.Edition.EDITION_2018)
     fun `test extra use of crate name 2`() = stubOnlyResolve("""
     //- dep-lib/lib.rs
@@ -731,5 +736,18 @@ class RsPackageLibraryResolveTest : RsResolveTestBase() {
 
         type T = Foo;
                //^ trans-lib/lib.rs
+    """)
+
+    fun `test extern crate double renaming`() = stubOnlyResolve("""
+    //- dep-lib/lib.rs
+        pub fn func() {}
+    //- lib.rs
+        extern crate dep_lib_target as foo1;
+        extern crate foo1 as foo2;
+
+        fn main() {
+            foo2::func();
+                 //^ unresolved
+        }
     """)
 }
