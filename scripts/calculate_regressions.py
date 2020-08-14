@@ -65,9 +65,8 @@ if __name__ == '__main__':
         print(ann)
     print()
     print(f"{len(new)} annotations introduced")
-    for ann in fixed:
+    for ann in new:
         print(ann)
-    print(flush=True)
 
     if len(new) > 0:
         raise Exception("New regressions detected")
