@@ -3,7 +3,7 @@ name: check
 on:
     push:
         branches:
-            - master
+#            - master
             - staging
             - trying
     pull_request:
@@ -26,6 +26,8 @@ jobs:
             - name: Check license
               run: ./check-license.sh
 
+            - name: Dump GitHub context
+              run: echo "${{ toJson(github) }}"
     check-plugin:
         strategy:
             fail-fast: false
