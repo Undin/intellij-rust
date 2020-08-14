@@ -45,9 +45,41 @@ jobs:
             fail-fast: false
             matrix:
                 project:
+                    - name: rust
+                      path: rust
+                      repository: rust-lang/rust
+                      exclude_paths: "src/llvm,src/llvm-emscripten,src/binaryen,src/test,src/ci,src/rt,src/compiler-rt,src/jemalloc,build,tmp"
+                    - name: cargo
+                      path: cargo
+                      repository: rust-lang/cargo
+                      exclude_paths: ""
                     - name: mysql_async
                       path: mysql_async
                       repository: blackbeam/mysql_async
+                      exclude_paths: ""
+                    - name: tokio
+                      path: tokio
+                      repository: tokio-rs/tokio
+                      exclude_paths: ""
+                    - name: amethyst
+                      path: amethyst
+                      repository: amethyst/amethyst
+                      exclude_paths: ""
+                    - name: clap
+                      path: clap
+                      repository: clap-rs/clap
+                      exclude_paths: ""
+                    - name: diesel
+                      path: diesel
+                      repository: diesel-rs/diesel
+                      exclude_paths: ""
+                    - name: rust-analyzer
+                      path: rust-analyzer
+                      repository: rust-analyzer/rust-analyzer
+                      exclude_paths: ""
+                    - name: juniper
+                      path: juniper
+                      repository: graphql-rust/juniper
                       exclude_paths: ""
         env:
             PROJECT_PATH: ${{ matrix.project.path }}
