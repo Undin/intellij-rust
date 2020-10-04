@@ -107,6 +107,10 @@ jobs:
               if: matrix.os == 'windows-latest'
               run: New-Item -ItemType Junction -Path "$env:RUST_SRC_WITH_SYMLINK" -Target "$(rustc --print sysroot)/lib/rustlib/src/rust"
 
+            - name: Show home dir
+              if: matrix.os == 'windows-latest'
+              run: Get-ChildItem -Path ~ -Force | ?{$_.LinkType} | select FullName,LinkType,Target
+
             - name: Download
               uses: eskatos/gradle-command-action@v1
               with:
