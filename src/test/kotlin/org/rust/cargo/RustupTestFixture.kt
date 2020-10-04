@@ -46,9 +46,11 @@ open class RustupTestFixture(
 
     private fun addCargoHomeToAllowedRoots() {
         val cargoHome = FileUtil.expandUserHome("~/.cargo")
+        println("Cargo home: $cargoHome")
         VfsRootAccess.allowRootAccess(testRootDisposable, cargoHome)
         // actions-rs/toolchain on CI creates symlink at `~/.cargo` while setting up of Rust toolchain
         val canonicalCargoHome = File(cargoHome).canonicalPath
+        println("canonical Cargo home: $canonicalCargoHome")
         if (cargoHome != canonicalCargoHome) {
             VfsRootAccess.allowRootAccess(testRootDisposable, canonicalCargoHome)
         }
