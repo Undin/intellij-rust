@@ -35,7 +35,7 @@ class CustomRealProjectAnalysisTest(
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun data(): Collection<Array<Any>> {
-            val projectsStr = System.getenv("REAL_PROJECTS") ?: error("Can't find `REAL_PROJECTS` env variable")
+            val projectsStr = System.getenv("PROJECTS") ?: error("Can't find `PROJECTS` env variable")
             val projects = JsonMapper().registerKotlinModule().readValue<List<RealProjectInfo>>(projectsStr)
             return projects.map { arrayOf(it.name, it) }
         }
