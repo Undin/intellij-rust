@@ -32,7 +32,7 @@ class RsUnresolvedReferenceInspection : RsLocalInspectionTool() {
                 if (path.reference == null) return
 
                 // Don't show unresolved reference error in attributes for now
-                if (path.ancestorStrict<RsMetaItem>() != null) return
+//                if (path.ancestorStrict<RsMetaItem>() != null) return
 
                 val isPathUnresolved = path.resolveStatus != PathResolveStatus.RESOLVED
                 val qualifier = path.qualifier
