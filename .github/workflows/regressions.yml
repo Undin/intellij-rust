@@ -50,7 +50,7 @@ jobs:
                           - name: cargo
                             repository: rust-lang/cargo
                           - name: tokio
-                            repository:
+                            repository: tokio-rs/tokio
                           - name: amethyst
                             repository: amethyst/amethyst
                     - name: regressions-2
