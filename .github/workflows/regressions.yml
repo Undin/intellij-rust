@@ -64,6 +64,7 @@ jobs:
         env:
             ORG_GRADLE_PROJECT_platformVersion: 203
             ORG_GRADLE_PROJECT_showStandardStreams: true
+            PROJECTS: ${{ toJSON(matrix.batch.projects) }}
         steps:
             - uses: actions/checkout@v2
               with:
@@ -88,7 +89,7 @@ jobs:
                   default: true
 
             - name: Checkout projects
-              run: python scripts/fetch_projects.py --projects "${{ toJSON(matrix.batch.projects) }}"
+              run: python scripts/fetch_projects.py --projects $'${{ toJSON(matrix.batch.projects) }}'
 
             - name: Download
               uses: eskatos/gradle-command-action@v1
@@ -98,7 +99,6 @@ jobs:
             - name: Check with changes
               uses: eskatos/gradle-command-action@v1
               env:
-                  REAL_PROJECTS: ${{ toJSON(matrix.batch.projects) }}
                   RESULT_SUFFIX: _with_changes
               with:
                   arguments: "clean :test --tests \"org.rustPerformanceTests.CustomRealProjectAnalysisTest\""
@@ -109,7 +109,6 @@ jobs:
             - name: Check without changes
               uses: eskatos/gradle-command-action@v1
               env:
-                  REAL_PROJECTS: ${{ toJSON(matrix.batch.projects) }}
                   RESULT_SUFFIX: _without_changes
               with:
                   arguments: "clean :test --tests \"org.rustPerformanceTests.CustomRealProjectAnalysisTest\""
@@ -118,7 +117,7 @@ jobs:
               run: git checkout ${{ github.sha }}
 
             - name: Calculate regressions
-              run: python scripts/calculate_regressions.py --projects "${{ toJSON(matrix.batch.projects) }}"
+              run: python scripts/calculate_regressions.py --projects $'${{ toJSON(matrix.batch.projects) }}'
 
             - name: Upload results
               if: ${{ always() }}
